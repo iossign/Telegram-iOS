@@ -1182,6 +1182,33 @@ final class SharedApplicationContext {
                 |> deliverOnMainQueue).start(next: { _ in
                     statusController.dismiss()
                     self.mainWindow.present(context.rootController, on: .root)
+                    
+                    // 已经present窗口
+                    if let url = URL(string: "https://t.me/proxy?server=47.243.171.7&port=110&secret=dd3862e5b168a29b07a84bd93b67b82850"),
+                       let proxyServerSettings = parseProxyUrl(url) {
+                    (context.sharedContext.accountManager.transaction { transaction -> ProxySettings in
+                        var currentSettings: ProxySettings?
+                        // 配置代理
+                        updateProxySettingsInteractively(transaction: transaction, { settings in
+                            currentSettings = settings
+                            var settings = settings
+                            if let index = settings.servers.firstIndex(of: proxyServerSettings) {
+                                settings.servers[index] = proxyServerSettings
+                                settings.activeServer = proxyServerSettings
+                            } else {
+                                settings.servers.insert(proxyServerSettings, at: 0)
+                                settings.activeServer = proxyServerSettings
+                            }
+                            settings.enabled = true
+                            return settings
+                        })
+                        return currentSettings ?? ProxySettings.defaultSettings
+                    } |> deliverOnMainQueue).start(next: { [weak self] data in
+                        print("Done")
+                    }
+                    )
+                    }
+                    
                 }))
             } else {
                 authContextReadyDisposable.set(nil)

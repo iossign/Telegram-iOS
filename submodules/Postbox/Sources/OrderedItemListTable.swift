@@ -126,7 +126,7 @@ final class OrderedItemListTable: Table {
             self.indexTable.set(collectionId: collectionId, id: items[i].id, content: items[i].contents)
         }
         #if ((arch(i386) || arch(x86_64)) && os(iOS)) || DEBUG
-            assert(self.testIntegrity(collectionId: collectionId))
+            // assert(self.testIntegrity(collectionId: collectionId))
         #endif
     }
     
